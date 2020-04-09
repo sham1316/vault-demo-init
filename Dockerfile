@@ -10,7 +10,6 @@ FROM alpine:3.11.5
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/app .
-COPY mqtt2nats.yml .
 
 EXPOSE 80
 ENTRYPOINT ["./app"]
