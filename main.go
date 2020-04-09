@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/hashicorp/vault/api"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -39,10 +39,15 @@ func main() {
 	if secret, err = client.Auth().Token().Create(tokenCreateRequest); err != nil {
 		panic(err)
 	}
-	var file *os.File
-	if file, err = os.OpenFile(vaultTokenPath, os.O_CREATE, 666); err != nil {
-		log.Fatal(err)
+
+	err = ioutil.WriteFile(vaultTokenPath, []byte(secret.Auth.ClientToken), 0644)
+	if err != nil {
+		panic(err)
 	}
-	defer file.Close()
-	file.Write([]byte(secret.Auth.ClientToken))
+
+	b, err := ioutil.ReadFile(vaultTokenPath)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("VAULT_TOKEN:", string(b))
 }
