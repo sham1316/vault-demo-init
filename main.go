@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -13,20 +14,23 @@ var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
 }
 
-var tokenCreateRequest = &api.TokenCreateRequest{
-	Policies:       []string{"reader"},
-	TTL:            "10m",
-	ExplicitMaxTTL: "10m",
-	NumUses:        1,
-}
-
 func main() {
+	vaultPolicies := os.Getenv("VAULT_POLICIES")
 	vaultAddr := os.Getenv("VAULT_ADDR")
 	vaultTokenPath := os.Getenv("VAULT_TOKEN_PATH")
 	vaultMasterToken := os.Getenv("VAULT_MASTER_TOKEN")
-	fmt.Println("VAULT_ADDR:", vaultAddr)
+	vaultTTL := os.Getenv("VAULT_TTL")
+	fmt.Println("VAULT_ADDR:", vaultPolicies)
+	fmt.Println("VAULT_POLICIES:", vaultAddr)
 	fmt.Println("VAULT_TOKEN_PATH:", vaultTokenPath)
-	fmt.Println("VAULT_MASTER_TOKEN:", vaultMasterToken)
+	fmt.Println("VAULT_TTL:", vaultTTL)
+
+	var tokenCreateRequest = &api.TokenCreateRequest{
+		Policies:       strings.Split(vaultPolicies, " "),
+		TTL:            vaultTTL,
+		ExplicitMaxTTL: vaultTTL,
+		NumUses:        1,
+	}
 
 	var err error
 	var client *api.Client
